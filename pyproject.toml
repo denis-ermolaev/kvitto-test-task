@@ -1,0 +1,80 @@
+[project]
+name = "kvitto-test-task"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+  "alembic>=1.19.2",
+  "asyncpg>=0.31.0",
+  "fastapi>=0.141.1",
+  "psycopg2-binary>=2.9.12",
+  "pydantic[email]>=2.13.5",
+  "sqlalchemy[asyncio]>=2.0.52",
+  "uvicorn[standard]>=0.53.0",
+]
+
+[dependency-groups]
+dev = [
+  "httpx>=0.28.1",
+  "pre-commit>=4.6.0",
+  "pre-commit-hooks>=6.0.0",
+  "pytest>=9.1.1",
+  "pytest-asyncio>=1.4.0",
+  "pytest-cov>=7.1.0",
+  "ruff>=0.15.20",
+  "ty>=0.0.55",
+]
+
+# Coverage ----
+[tool.coverage.run]
+data_file = "tmp/.coverage"
+
+# Pytest ----
+[tool.pytest.ini_options]
+addopts = [
+  "-s",
+  "-p no:cacheprovider",
+  "--cov=src",
+  "--cov-report=term-missing"
+]
+norecursedirs = ["migrations", ".venv", "tmp"]
+# Имена файлов с тестами: 001_simple_test.py
+python_files = ["*_test.py", "*_tests.py"]
+# Искать тесты в папке
+testpaths = ["tests/"]
+asyncio_mode = "auto"
+
+# Ruff ----
+[tool.ruff]
+cache-dir = "tmp/.ruff-cache"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+  "E501",  # длина строки
+  "RUF002",  # кириллица в докстрингах
+  "RUF003",  # кириллица в комментариях
+  "TC002",  # импорты для аннотации под from typing import TYPE_CHECKING,
+  "TC001",  # НО в Fast API они используются для выполнения
+  "TC003",  # Тоже самое
+  "CPY001"  # missing-copyright-notice
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = [
+  "S101",  # assert
+  "INP001",  # не нужен  __init__.py
+  "ANN201",  # тесты могут возвращать None
+  "PLR2004",  # для status_code == 201
+]
+"migrations/**" = [
+  "ALL",
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # Google Style
+
+# ty ----
+[tool.ty.environment]
+python-version = "3.14"

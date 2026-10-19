@@ -1,0 +1,95 @@
+repos:
+  - repo: local
+    hooks:
+      - id: trailing-whitespace
+        name: trailing-whitespace
+        entry: uv run trailing-whitespace-fixer
+        language: system
+        types: [text]
+
+      - id: end-of-file-fixer
+        name: end-of-file-fixer
+        entry: uv run end-of-file-fixer
+        language: system
+        types: [text]
+
+      - id: check-yaml
+        name: check-yaml
+        entry: uv run check-yaml
+        language: system
+        types: [yaml]
+
+      - id: check-json
+        name: check-json
+        entry: uv run check-json
+        language: system
+        types: [json]
+
+      - id: check-toml
+        name: check-toml
+        entry: uv run check-toml
+        language: system
+        types: [toml]
+
+      - id: check-merge-conflict
+        name: check-merge-conflict
+        entry: uv run check-merge-conflict
+        language: system
+        types: [text]
+
+      - id: check-case-conflict
+        name: check-case-conflict
+        entry: uv run check-case-conflict
+        language: system
+
+      - id: mixed-line-ending
+        name: mixed-line-ending
+        entry: uv run mixed-line-ending --fix=lf
+        language: system
+        types: [text]
+
+      - id: check-added-large-files
+        name: check-added-large-files
+        entry: uv run check-added-large-files
+        language: system
+        args: ['--maxkb=20000']
+        types: [file]
+
+      - id: detect-private-key
+        name: detect-private-key
+        entry: uv run detect-private-key
+        language: system
+        types: [file]
+
+      - id: debug-statements
+        name: debug-statements
+        entry: uv run debug-statement-hook
+        language: system
+        types: [python]
+
+      - id: ruff-check
+        name: ruff (lint + fix)
+        entry: uv run ruff check --fix
+        language: system
+        types: [python]
+
+      - id: ruff-format
+        name: ruff (format)
+        entry: uv run ruff format
+        language: system
+        types: [python]
+
+      - id: ty
+        name: ty
+        entry: uv run ty check
+        language: system
+        types: [python]
+        pass_filenames: false
+        require_serial: true
+
+      - id: tests
+        name: tests
+        entry: make test_all
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
