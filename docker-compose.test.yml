@@ -1,5 +1,5 @@
 services:
-  # 1. PostgreSQL ----
+  # PostgreSQL ----
   db:
     image: postgres:16.2-alpine3.19
     environment:
@@ -14,7 +14,7 @@ services:
       timeout: 5s
       retries: 5
     tmpfs: /var/lib/postgresql/data
-  # 2. FastAPI-application ----
+  # FastAPI-application ----
   web:
     build:
       context: .

@@ -1,5 +1,5 @@
 services:
-  # 1. PostgreSQL ----
+  # PostgreSQL ----
   db:
     image: postgres:16.2-alpine3.19
     volumes:
@@ -15,7 +15,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-  # 2. FastAPI-application ----
+  # FastAPI-application ----
   web:
     build:
       context: .

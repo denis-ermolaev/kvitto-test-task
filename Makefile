@@ -3,8 +3,8 @@
 COMPOSE := docker compose
 WEB := $(COMPOSE) -f docker-compose.dev.yml exec web
 
-# Самые важные команды
-.PHONY: run_project pre-commit_all
+# Самые важные команды (+ чтобы make не считал команды - файлами или директориями)
+.PHONY: run_project pre-commit_all make_migrations migrations
 
 ## Справка
 help:
@@ -49,7 +49,6 @@ test_all:
 	trap '$(MAKE) -s down_test' EXIT; \
 	$(MAKE) test
 
-# ИИ-ревью ----
 ## Ревью кода от ИИ-агента
 review_project:
 	opencode run --agent plan "Проведи финальный чек лист всего проекта, как написанно в файле AGENT.md" > tmp/review-project.md
@@ -78,6 +77,7 @@ shell:
 ## Запустить контейнер разработки без пересборки
 dev_compose_without_build:
 	$(COMPOSE) -f docker-compose.dev.yml up -d --no-build
+	$(MAKE) migrations
 
 ## Остановить контейнер разработки
 dev_down:
