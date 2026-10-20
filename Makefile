@@ -13,14 +13,14 @@ help:
 
 
 run_project:
-	dev_compose_build
+	$(MAKE) dev_compose_build
 	@if [ ! -f .env ]; then \
 		cp .env.example .env; \
 		echo ".env создан"; \
 	else \
 		echo ".env уже есть"; \
 	fi
-	dev_compose_without_build
+	$(MAKE) dev_compose_without_build
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 #                                 Качество кода                                #
@@ -55,7 +55,7 @@ run_actions:
 
 ## Ревью кода от ИИ-агента
 review_project:
-	opencode run --agent plan "Проведи финальный чек лист всего проекта, как написанно в файле AGENT.md" > tmp/review-project.md
+	opencode run --agent build "Проведи финальный чек-лист проекта строго по пунктам из AGENT.md (для каждого: выполнено/не выполнено/не применимо, с кратким пояснением). Не изменяй, не создавай и не удаляй файлы в проекте — только читай и анализируй" > tmp/review-project.md
 
 # ---------------------------------------------------------------------------- #
 

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Payment, Tariff, get_async_db
 from src.lifespan import lifespan
-from src.shemas import (
+from src.schemas import (
     ChangePaymentStatusRequest,
     Health,
     PaymentRequest,
@@ -166,7 +166,7 @@ async def change_payment_status(
     request: Request,
     data: ChangePaymentStatusRequest,
     db: Annotated[AsyncSession, Depends(get_async_db)],
-    signature: Annotated[str, Header(alias="X-Signature")],
+    signature: Annotated[str | None, Header(alias="X-Signature")] = None,
 ) -> JSONResponse:
     """Банк изменяет статус платежа."""
     raw_body = await request.body()
@@ -177,7 +177,7 @@ async def change_payment_status(
         msg=raw_body,
         digestmod=hashlib.sha256,
     ).hexdigest()
-    if not hmac.compare_digest(expected_signature, signature):
+    if signature is None or not hmac.compare_digest(expected_signature, signature):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     payment = await db.scalars(select(Payment).where(Payment.id == data.payment_id))
     payment = payment.one_or_none()

@@ -8,7 +8,7 @@ import uuid
 
 from httpx import AsyncClient
 
-from src.shemas import PaymentResponse
+from src.schemas import PaymentResponse
 from src.utils import installment_schedule
 
 
@@ -133,6 +133,7 @@ async def test_post_payments_installment(http_client: AsyncClient):
         },
     )
     assert result.is_success
+    json_result = result.json()
     assert sum(json_result["schedule"]) == json_result["amount"]
 
     # На 12 ----
@@ -147,6 +148,7 @@ async def test_post_payments_installment(http_client: AsyncClient):
         },
     )
     assert result.is_success
+    json_result = result.json()
     assert sum(json_result["schedule"]) == json_result["amount"]
 
     # На 24 - не разрешённое кол-во месяцев ----
@@ -310,6 +312,12 @@ async def test_change_payment_status(http_client: AsyncClient):
     assert result.json() == {"result": "ok"}
 
     # Неправильный переход с succeeded к failed ----
+    result = await http_client.get(
+        f"/payments/{1}",
+    )
+    assert result.is_success
+    assert result.json()["status"] == "succeeded"
+
     payload = {"payment_id": 1, "status": "failed"}
     raw_body = json.dumps(payload, separators=(",", ":")).encode("utf-8")
     signature = hmac.new(
@@ -327,6 +335,12 @@ async def test_change_payment_status(http_client: AsyncClient):
     )
     assert result.status_code == 409
     assert result.json() == {"error": "invalid_transition"}
+
+    result = await http_client.get(
+        f"/payments/{1}",
+    )
+    assert result.is_success
+    assert result.json()["status"] == "succeeded"
 
     # Неправильная подпись ----
     result = await http_client.post(
