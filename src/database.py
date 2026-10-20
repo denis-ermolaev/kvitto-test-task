@@ -6,8 +6,8 @@ from types import AsyncGeneratorType
 
 from dotenv import load_dotenv
 from fastapi import Request
-from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, String, func
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, String, func, select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 load_dotenv()
@@ -17,7 +17,9 @@ DB_URL = f"postgresql+asyncpg://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')
 
 async def get_async_db(request: Request) -> AsyncGeneratorType[AsyncSession]:
     """Depends от базы данных. Даёт асинхронную сессию."""
-    pg_async_session = request.app.state.pg_async_session
+    pg_async_session: async_sessionmaker[AsyncSession] = (
+        request.app.state.pg_async_session
+    )
     async with pg_async_session() as session:
         yield session
 
@@ -80,3 +82,23 @@ class Payment(Base):
         "Tariff",
         back_populates="payments",
     )
+
+
+async def fill_db(pg_async_session: async_sessionmaker[AsyncSession]) -> None:
+    """Заполняет базу данных начальными значениями."""
+    async with pg_async_session() as db:
+        tarriffs = [
+            ("basic", 9900_00),
+            ("standard", 19900_00),
+            ("premium", 29900_00),
+        ]
+        title, price = 0, 1
+
+        for tarriff in tarriffs:
+            current_tariff = await db.scalars(
+                select(Tariff).where(Tariff.title == tarriff[title])
+            )
+            current_tariff = current_tariff.one_or_none()
+            if current_tariff is None:
+                db.add(Tariff(title=tarriff[title], price=tarriff[price]))
+                await db.commit()
