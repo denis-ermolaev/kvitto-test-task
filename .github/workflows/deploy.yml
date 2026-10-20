@@ -1,0 +1,44 @@
+name: Checks
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          # Включаем кэш для uv, чтобы не скачивать зависимости каждый раз
+          enable-cache: true
+          # Фиксация версии
+          version: "0.13.1"
+
+      - name: Set up Python
+        # uv сам скачает нужную версию Python из pyproject.toml (requires-python = ">=3.14")
+        run: uv python install
+
+      - name: Install dependencies
+        # Устанавливаем строго по uv.lock, без обновления и без изменения файлов
+        run: uv sync --frozen
+
+      - name: Check formatting
+        # --check проверяет, отформатирован ли код, но НЕ меняет его
+        run: uv run ruff format --check
+
+      - name: Lint with ruff
+        # Без --fix, только проверка
+        run: uv run ruff check
+
+      - name: Type check with ty
+        # ty проверяет типы (read-only)
+        run: uv run ty check
+
+      - name: Run tests
+        run: make test_all

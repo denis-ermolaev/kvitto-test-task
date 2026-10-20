@@ -49,6 +49,10 @@ test_all:
 	trap '$(MAKE) -s down_test' EXIT; \
 	$(MAKE) test
 
+## Запустить GitHub Actions локально, требуется установленный act (https://github.com/nektos/act)
+run_actions:
+	act
+
 ## Ревью кода от ИИ-агента
 review_project:
 	opencode run --agent plan "Проведи финальный чек лист всего проекта, как написанно в файле AGENT.md" > tmp/review-project.md

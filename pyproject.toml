@@ -58,7 +58,8 @@ ignore = [
   "TC002",  # импорты для аннотации под from typing import TYPE_CHECKING,
   "TC001",  # НО в Fast API они используются для выполнения
   "TC003",  # Тоже самое
-  "CPY001"  # missing-copyright-notice
+  "CPY001",  # missing-copyright-notice
+  "COM812",  # Запятые в конце эл. списка, чтобы не ругался с форматтером
 ]
 
 [tool.ruff.lint.per-file-ignores]
