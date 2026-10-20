@@ -40,5 +40,8 @@ jobs:
         # ty проверяет типы (read-only)
         run: uv run ty check
 
+      - name: Prepare .env for tests
+        run: cp .env.example .env
+
       - name: Run tests
         run: make test_all
