@@ -1,8 +1,8 @@
 """SQLAlhemy."""
 
 import os
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
-from types import AsyncGeneratorType
 
 from dotenv import load_dotenv
 from fastapi import Request
@@ -15,7 +15,7 @@ load_dotenv()
 DB_URL = f"postgresql+asyncpg://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 
 
-async def get_async_db(request: Request) -> AsyncGeneratorType[AsyncSession]:
+async def get_async_db(request: Request) -> AsyncGenerator[AsyncSession]:
     """Depends от базы данных. Даёт асинхронную сессию."""
     pg_async_session: async_sessionmaker[AsyncSession] = (
         request.app.state.pg_async_session

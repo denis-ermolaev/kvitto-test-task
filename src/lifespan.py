@@ -1,6 +1,6 @@
 """Определение lifespan для FastAPI приложения."""
 
-from types import AsyncGeneratorType
+from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
@@ -10,7 +10,7 @@ from src.database import DB_URL, fill_db
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI) -> AsyncGeneratorType[None]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     """Асинхронный контекстный менеджер для открытия и закрытия базы данных для FastAPI приложения."""
     # __enter___
     # Подключение к PostgreSQL ----

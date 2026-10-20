@@ -16,6 +16,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+  "asgi-lifespan>=2.1.0",
   "httpx>=0.28.1",
   "pre-commit>=4.6.0",
   "pre-commit-hooks>=6.0.0",
@@ -44,6 +45,8 @@ python_files = ["*_test.py", "*_tests.py"]
 # Искать тесты в папке
 testpaths = ["tests/"]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
 
 # Ruff ----
 [tool.ruff]
