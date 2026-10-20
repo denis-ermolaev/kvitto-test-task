@@ -53,6 +53,7 @@ cache-dir = "tmp/.ruff-cache"
 select = ["ALL"]
 ignore = [
   "E501",  # длина строки
+  "RUF001",  # кириллица в string
   "RUF002",  # кириллица в докстрингах
   "RUF003",  # кириллица в комментариях
   "TC002",  # импорты для аннотации под from typing import TYPE_CHECKING,

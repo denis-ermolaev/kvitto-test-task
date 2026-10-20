@@ -1,8 +1,8 @@
 """Auto-generated migration
 
-Revision ID: ea8729f76b97
+Revision ID: 41ce7667d232
 Revises:
-Create Date: 2026-10-20 06:18:37.791478
+Create Date: 2026-10-20 11:29:37.538092
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "ea8729f76b97"
+revision: str = "41ce7667d232"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,16 +40,13 @@ def upgrade() -> None:
         ),
         sa.Column("amount", sa.Integer(), nullable=False),
         sa.Column("discount", sa.Integer(), nullable=False),
+        sa.Column("promo_code", sa.String(), nullable=True),
         sa.Column(
             "method",
             sa.Enum("card", "sbp", "installment", name="payment_method"),
             nullable=False,
         ),
-        sa.Column(
-            "installment_months",
-            sa.Enum("3", "6", "12", name="installment_months"),
-            nullable=False,
-        ),
+        sa.Column("installment_months", sa.Integer(), nullable=True),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
@@ -58,6 +55,7 @@ def upgrade() -> None:
         ),
         sa.Column("schedule", sa.JSON(), nullable=True),
         sa.Column("email", sa.String(), nullable=False),
+        sa.Column("idempotency_key", sa.String(), nullable=True),
         sa.Column("tariff_id", sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(
             ["tariff_id"],

@@ -51,18 +51,20 @@ class Payment(Base):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, index=True)
     status: Mapped[str] = mapped_column(
         Enum("pending", "succeeded", "failed", "refunded", name="status"),
+        default="pending",
         nullable=False,
     )
     amount: Mapped[int] = mapped_column(Integer, nullable=False)
     discount: Mapped[int] = mapped_column(Integer, nullable=False)
+    promo_code: Mapped[str] = mapped_column(String, nullable=True)
     method: Mapped[str] = mapped_column(
         Enum("card", "sbp", "installment", name="payment_method"),
         nullable=False,
     )
 
-    installment_months: Mapped[str] = mapped_column(
-        Enum("3", "6", "12", name="installment_months"),
-        nullable=False,
+    installment_months: Mapped[int] = mapped_column(
+        Integer,
+        nullable=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(
@@ -74,7 +76,9 @@ class Payment(Base):
 
     schedule: Mapped[list] = mapped_column(JSON, nullable=True)
 
-    email: Mapped[list] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False)
+
+    idempotency_key: Mapped[str] = mapped_column(String, nullable=True)
 
     tariff_id = mapped_column(ForeignKey("tariffs.id"), nullable=False)
 

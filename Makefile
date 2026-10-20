@@ -95,6 +95,10 @@ dev_compose_build:
 test_compose_build:
 	$(COMPOSE) -f docker-compose.test.yml build
 
+## Остановить контейнер разработки и удалить volume
+remove_volume:
+	$(COMPOSE) -f docker-compose.dev.yml down -v
+
 # ---------------------------------------------------------------------------- #
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
