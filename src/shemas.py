@@ -58,3 +58,10 @@ class PaymentResponse(BaseModel):
     created_at: dt.datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ChangePaymentStatusRequest(BaseModel):
+    """Тело запроса на смену статуса платежа."""
+
+    payment_id: int
+    status: Literal["pending", "succeeded", "failed", "refunded"]

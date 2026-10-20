@@ -1,15 +1,28 @@
 """Точка входа в FastAPI приложение."""
 
+import hashlib
+import hmac
+import os
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Response, status
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import Payment, Tariff, get_async_db
 from src.lifespan import lifespan
-from src.shemas import Health, PaymentRequest, PaymentResponse, TariffResponse
+from src.shemas import (
+    ChangePaymentStatusRequest,
+    Health,
+    PaymentRequest,
+    PaymentResponse,
+    TariffResponse,
+)
 from src.utils import installment_schedule
+
+load_dotenv()
 
 app = FastAPI(lifespan=lifespan)
 
@@ -108,7 +121,16 @@ async def post_payments(
     return PaymentResponse.model_validate(new_payment)
 
 
-@app.get("/payments/{payment_id}", status_code=200, tags=["Main"])
+@app.get(
+    "/payments/{payment_id}",
+    responses={
+        404: {
+            "description": "Не найден платёж.",
+        },
+    },
+    status_code=200,
+    tags=["Main"],
+)
 async def get_payments(
     payment_id: int, db: Annotated[AsyncSession, Depends(get_async_db)]
 ) -> PaymentResponse:
@@ -118,3 +140,54 @@ async def get_payments(
     if payment is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return PaymentResponse.model_validate(payment)
+
+
+PERMISSIBLE_TRANSITIONS = [
+    ("pending", "succeeded"),
+    ("pending", "failed"),
+    ("succeeded", "refunded"),
+]
+
+
+@app.post(
+    "/webhooks/bank",
+    status_code=200,
+    responses={
+        409: {
+            "description": "Недопустимый переход статуса платежа.",
+        },
+        404: {
+            "description": "Не найден платёж.",
+        },
+    },
+    tags=["Main"],
+)
+async def change_payment_status(
+    request: Request,
+    data: ChangePaymentStatusRequest,
+    db: Annotated[AsyncSession, Depends(get_async_db)],
+    signature: Annotated[str, Header(alias="X-Signature")],
+) -> JSONResponse:
+    """Банк изменяет статус платежа."""
+    raw_body = await request.body()
+    expected_signature = hmac.new(
+        key=os.environ[
+            "WEBHOOK_SECRET"
+        ].encode(),  # секрет в байтах | os.environ - чтобы была ошибка
+        msg=raw_body,
+        digestmod=hashlib.sha256,
+    ).hexdigest()
+    if not hmac.compare_digest(expected_signature, signature):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    payment = await db.scalars(select(Payment).where(Payment.id == data.payment_id))
+    payment = payment.one_or_none()
+    if payment is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    if (payment.status, data.status) not in PERMISSIBLE_TRANSITIONS:
+        return JSONResponse(
+            status_code=status.HTTP_409_CONFLICT,
+            content={"error": "invalid_transition"},
+        )
+    payment.status = data.status
+    await db.commit()
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"result": "ok"})
