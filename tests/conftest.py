@@ -8,12 +8,14 @@ import pytest
 from alembic import command
 from alembic.config import Config
 from asgi_lifespan import LifespanManager
+from dotenv import load_dotenv
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from src.app import app
-from src.database import Base
+
+load_dotenv()
 
 
 @pytest.fixture(scope="session")
@@ -56,6 +58,6 @@ async def db_session() -> AsyncGenerator[AsyncSession]:
 async def clean_database(db_session: AsyncSession) -> AsyncGenerator[None]:
     """Чистит БД после каждого теста."""
     yield
-    tables = ", ".join(f'"{t.name}"' for t in Base.metadata.sorted_tables)
-    await db_session.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
+    # Не трогаем таблицу с тарифами, так как они заполняются только один раз в lifespan
+    await db_session.execute(text("TRUNCATE payments RESTART IDENTITY CASCADE"))
     await db_session.commit()

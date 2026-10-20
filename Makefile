@@ -37,11 +37,11 @@ pre-commit-all:
 
 ## Запустить тесты в тестовом окружении
 test:
-	$(COMPOSE) -f docker-compose.test.yml run --rm web
+	$(COMPOSE) -f docker-compose.test.yml -p kvitto_test run --rm web
 
 ## Удалить тестовые контейнеры
 down_test:
-	$(COMPOSE) -f docker-compose.test.yml down -v
+	$(COMPOSE) -f docker-compose.test.yml -p kvitto_test down -v
 
 ## Единная команда для запуска тестов
 test_all:
